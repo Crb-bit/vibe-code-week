@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<title>Goal or Coal</title>
+
+<style>
+body {
+    margin: 0;
+    font-family: 'Segoe UI', sans-serif;
+    background: radial-gradient(circle at top, #222, #000);
+    color: #eee;
+}
+
+.container {
+    max-width: 900px;
+    margin: auto;
+    padding: 40px 20px;
+}
+
+h1 {
+    text-align: center;
+    letter-spacing: 2px;
+}
+
+.status {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 30px;
+    opacity: 0.8;
+}
+
+.paths {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+}
+
+.path {
+    background: #111;
+    border-radius: 12px;
+    padding: 20px;
+}
+
+.material {
+    display: flex;
+    justify-content: space-between;
+    margin: 8px 0;
+}
+
+button {
+    width: 100%;
+    margin-top: 15px;
+    padding: 12px;
+    background: linear-gradient(135deg, #f5c542, #d4a017);
+    border: none;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+button:hover {
+    filter: brightness(1.1);
+}
+
+.result, .end {
+    text-align: center;
+    margin-top: 30px;
+    font-size: 18px;
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+
+<h1>⛏️ GOAL OR COAL</h1>
+
+<div class="status">
+    <div id="round"></div>
+    <div id="score"></div>
+</div>
+
+<div class="paths" id="paths"></div>
+
+<div class="result" id="result"></div>
+<div class="end" id="end"></div>
+
+</div>
+
+<script>
+/* ---------- GAME DATA ---------- */
+
+const materials = {
+    Coal: 1,
+    Iron: 3,
+    Gold: 6,
+    Diamond: 12
+};
+
+let round = 1;
+let score = 0;
+let pathA, pathB;
+
+/* ---------- GAME LOGIC ---------- */
+
+function generatePath() {
+    let chances = {
+        Coal: rand(30, 45),
+        Iron: rand(25, 40),
+        Gold: rand(10, 25),
+        Diamond: rand(5, 15)
+    };
+
+    const total = Object.values(chances).reduce((a, b) => a + b);
+    for (let m in chances) {
+        chances[m] = Math.round(chances[m] / total * 100);
+    }
+
+    // fix to exactly 100%
+    const diff = 100 - Object.values(chances).reduce((a, b) => a + b);
+    chances.Coal += diff;
+
+    return chances;
+}
+
+function mine(path) {
+    let roll = rand(1, 100);
+    let current = 0;
+
+    for (let mat in path) {
+        current += path[mat];
+        if (roll <= current) return mat;
+    }
+}
+
+function rand(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+/* ---------- RENDERING ---------- */
+
+function render() {
+    document.getElementById("round").innerText = `Ronde: ${Math.min(round, 5)}/5`;
+    document.getElementById("score").innerText = `Score: ${score}`;
+
+    const pathsDiv = document.getElementById("paths");
+    pathsDiv.innerHTML = "";
+
+    if (round > 5) {
+        document.getElementById("end").innerHTML = `
+            <h2>🏁 Einde van de mijn</h2>
+            <p>Eindscore: <strong>${score}</strong></p>
+            <button onclick="resetGame()">Opnieuw spelen</button>
+        `;
+        return;
+    }
+
+    [ ["A", pathA], ["B", pathB] ].forEach(([key, path]) => {
+        let html = `<div class="path"><h2>Pad ${key}</h2>`;
+
+        for (let mat in path) {
+            html += `
+                <div class="material">
+                    <span>${mat}</span>
+                    <span>${path[mat]}% (${materials[mat]})</span>
+                </div>
+            `;
+        }
+
+        html += `
+            <button onclick="choosePath('${key}')">
+                Kies Pad ${key}
+            </button>
+        </div>`;
+
+        pathsDiv.innerHTML += html;
+    });
+}
+
+/* ---------- GAME FLOW ---------- */
+
+function choosePath(key) {
+    const chosen = key === "A" ? pathA : pathB;
+    const found = mine(chosen);
+
+    score += materials[found];
+    round++;
+
+    document.getElementById("result").innerText =
+        `Je vond ${found} (+${materials[found]})`;
+
+    pathA = generatePath();
+    pathB = generatePath();
+
+    render();
+}
+
+function resetGame() {
+    round = 1;
+    score = 0;
+    pathA = generatePath();
+    pathB = generatePath();
+    document.getElementById("result").innerText = "";
+    document.getElementById("end").innerHTML = "";
+    render();
+}
+
+/* ---------- START ---------- */
+
+pathA = generatePath();
+pathB = generatePath();
+render();
+</script>
+
+</body>
+</html>
