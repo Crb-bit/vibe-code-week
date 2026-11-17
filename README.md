@@ -1,3 +1,2 @@
-deze project is een browser puzzle game waar het doel is om over tegels te lopen om naar het einde te komen.
-je kan met de pijlen kiezen welke kant je op loopt.
-de andere folders zijn reflecties, notities en punten die gebruikt waren om het te maken.
+deze game is een game van kans, je kiest een pad die je wilt nemen met daarbij de kansen op wat je kan krijgen.
+de kans om iets te krijgen is niet altijd hetzelfde, elke keer zijn de percentages anders zodat je goed moet kiezen of je probeert groot te winnen of het veilig spelen.
